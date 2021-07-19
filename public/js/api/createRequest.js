@@ -3,53 +3,52 @@
  * на сервер.
  * */
  const createRequest = (options = {}) => {
-    const xhr = new XMLHttpRequest();
-    let formData = null;
+    const f = function () {}, {
+        url = '',
+        method = 'GET',
+        callback = f,
+        responseType = '',
+        async = true,
+        data = {}
+    } = options,
 
-    let {url} = options;
-    const {data, headers, responseType, method, callback} = options;
+     xhr = new XMLHttpRequest();
 
-    if (!method) {
-        return xhr;
-    }
-
-    if (method === 'GET' && typeof data === 'object' && Object.keys(data).length !==0) {
-        url += '?' + Object.entries(data).map(([k, v]) => `${k}=${v}`).join('&');
-    } else if (method === 'POST' && typeof data === 'object' && Object.keys(data).length !== 0) {
-        formData = new FormData;
-        for (const d in data) {
-            formData.append(d, data[d]);
+    if (method === 'GET') {
+        let params = '';
+        for (param in data) {
+            params += param + '=' + data[param] + '&';
         }
-    }
+        try {
+            xhr.open(method, url + '/?' + params.slice(0, -1), async);
+            xhr.responseType = responseType;
+            xhr.withCredentials = true;
+            xhr.send();
+        } catch (err) {
+            callback (err)
+        }
+    } else {
+        let formData = new FormData();
+        for (let item in data) {
+            formData.append(item, data[item]);
+        }
+        try {
+            xhr.open(method, url);
+            xhr.responseType = responseType;
+            xhr.withCredentials = true;
+            xhr.send(formData);
+        } catch (err) {
+            callback (err)
+        }
+    }     
 
-    for (const h in headers) {
-        xhr.setRequestHeader(h, headers[h]);
-    }
-
-    xhr.responseType = responseType;
-    xhr.withCredentials = true;
-
-    if (typeof callback === 'function') {
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === 4) {
-                if (xhr.status === 200) {
-                    if (responseType === 'json') {
-                        callback(null, xhr.response);
-                    } else {
-                        callback(null, xhr.responseText);
-                    }
-                } else {
-                    callback(new Error('Ошибка' + xhr.status));
-                }
+    xhr.addEventListener('readystatechange', () => {
+        if (xhr.readyState === xhr.DONE && xhr.status == 200) {
+            if (!xhr.response.success) {
+                callback(xhr.response.error, xhr.response);
+            } else {
+                callback(null, xhr.response);
             }
         }
-        xhr.onerror = function (e) {
-            callback(e);
-        }
-    }
-
-    xhr.open(method, url, true);
-    xhr.send(formData);
-
-    return xhr;
-};
+    });
+ };

@@ -3,7 +3,7 @@
  * регистрацией пользователя из приложения
  * Имеет свойство URL, равное '/user'.
  * */
-class User {
+ class User {
   static URL = '/user';
   /**
    * Устанавливает текущего пользователя в
@@ -37,7 +37,6 @@ class User {
     const options = {
       url: `${User.URL}/current`,
       method: 'GET',
-      data: data,
       responseType: 'json',
       callback: (err, response) => {
         if (err === null) {

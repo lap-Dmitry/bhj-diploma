@@ -1,14 +1,16 @@
 /**
  * Класс CreateTransactionForm управляет формой
  * создания новой транзакции
+ * Наследуется от AsyncForm
  * */
-class CreateTransactionForm extends AsyncForm {
+ class CreateTransactionForm extends AsyncForm{
   /**
    * Вызывает родительский конструктор и
    * метод renderAccountsList
    * */
-  constructor(element) {
-    super(element)
+  constructor( element ) {
+    super(element);
+    this.renderAccountsList();
   }
 
   /**
@@ -16,7 +18,19 @@ class CreateTransactionForm extends AsyncForm {
    * Обновляет в форме всплывающего окна выпадающий список
    * */
   renderAccountsList() {
-
+    Account.list({} , (err,response) => {
+      if (err === null) {
+        if (response.success) {
+          const accountSelect = document.querySelector(`#${this.element.id} .accounts-select`);
+          accountSelect.innerHTML = '';
+          response.data.forEach((account) => {
+            accountSelect.insertAdjacentHTML('beforeend', `<option value="${account.id}">${account.name}</option>`);
+          });
+        } else {
+          alert(JSON.stringify(response.error));
+        }
+      }
+    });
   }
 
   /**
@@ -25,7 +39,21 @@ class CreateTransactionForm extends AsyncForm {
    * вызывает App.update(), сбрасывает форму и закрывает окно,
    * в котором находится форма
    * */
-  onSubmit(data) {
-
+  onSubmit( options ) {
+    Transaction.create(options, (err,response) => {
+      if (err === null) {
+        if (response.success) {
+          if (this.element.id === 'new-income-form') {
+            App.getModal('newIncome').close();
+          } else {
+            App.getModal('newExpense').close();
+          }
+          this.element.reset();
+          App.update();
+        } else {
+          alert(JSON.stringify(response.error));
+        }
+      }
+    })
   }
 }

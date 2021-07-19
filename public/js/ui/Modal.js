@@ -47,7 +47,7 @@ class Modal {
     const closeElements = this.element.querySelectorAll('[data-dismiss="modal"]');
 
     closeElements.forEach((el) => {
-      el.removeEventListener('click, this.onClose');
+      el.removeEventListener('click', this.onClose);
     })
   }
   /**
