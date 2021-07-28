@@ -46,7 +46,7 @@
             this.unsetCurrent();
           }
         }
-        return callback
+        return callback(err, response);
       }
     };
     return createRequest(options);
